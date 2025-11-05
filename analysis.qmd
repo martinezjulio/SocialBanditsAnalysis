@@ -1,0 +1,133 @@
+---
+title: "Analysis Driver"
+format:
+  html:
+    toc: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+library(here)
+library(tidyverse)
+library(janitor)
+library(lme4)
+library(ggthemes)
+library(stringr)
+library(ggtext)
+
+# Source the scripts that hold the real logic
+source("R/reward_plots.R")
+source("R/entropy_plots.R")
+source("R/choice_frequencies.R")
+source("R/correlations.R")
+source("R/individual_behavior.R")
+source("R/behavior_distribution.R")
+source("R/behavior_distribution_average.R")
+source("R/individual_behavior_distribution.R")
+```
+
+## Data
+
+```{r}
+experiment_name <- "transfer_bandits_choice_textbox"
+version         <- "pilot_C"
+
+# Create the figure directory
+fig_dir <- here("figures", experiment_name, version)
+if (!dir.exists(fig_dir)) {
+  dir.create(fig_dir, recursive = TRUE)
+}
+
+preprocessed_df <- read_csv(
+  here(
+    "data",
+    experiment_name,
+    version,
+    paste0("preprocessed_data.csv")
+  )
+)
+head(preprocessed_df)
+```
+
+## Plots
+
+### Choice Frequencies
+
+```{r}
+p1 <- choice_frequencies(preprocessed_df, experiment_name, version, save = TRUE)
+print(p1)
+```
+
+### Reward Plots
+
+```{r}
+p2 <- reward_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p2)
+```
+
+### Entropy Plots 
+
+```{r}
+p3 <- entropy_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p3)
+```
+
+
+
+### Arm-Pulling Correlations
+
+```{r}
+p4 <- correlations(preprocessed_df, experiment_name, version, save = TRUE)
+print(p4)
+```
+
+### Individual Participant Trajectories
+
+Note: This generates one plot per participant showing their complete trajectory through the bandit task. Files are saved to `figures/{experiment}/{version}/individual_participants/`.
+
+```{r}
+# Generate individual participant plots (saved as separate PNG files)
+individual_behavior(preprocessed_df, experiment_name, version, save = TRUE)
+```
+
+### Behavior Distribution Grid (Aggregate Counts)
+
+Note: This generates a large grid showing total arm-pulling counts across all games. Saved as a separate file.
+
+```{r}
+# Generate behavior distribution grid (saved as PNG file)
+behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+```
+
+### Average Behavior Distribution Grid
+
+Note: This shows the average percentage of pulls to each rank across participants. Unlike the aggregate version, this normalizes each participant's behavior to proportions first, then averages them. This gives equal weight to each participant and shows the typical behavior pattern.
+
+```{r}
+# Generate average behavior distribution grid (saved as PNG file)
+p_dist_avg <- behavior_distribution_average(preprocessed_df, experiment_name, version, save = TRUE)
+print(p_dist_avg)Round Y
+```
+
+```{r}
+# Generate average behavior distribution grid (saved as PNG file)
+p_dist_avg <- average_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+print(p_dist_avg)Round Y
+```
+
+### Individual Participant Distributions
+
+Note: This generates one distribution plot per participant showing their arm choices across all 12 games. Files are saved to `figures/{experiment}/{version}/individual_distributions/`.
+
+```{r}
+# Generate individual participant distribution plots (saved as separate PNG files)
+individual_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+```
+
+
+```{r}
+sort(c(0.55,0,0.8,0.5,0.4,0.3,0.6,0.75,0.1,0.35,0.45,0.2))
+```

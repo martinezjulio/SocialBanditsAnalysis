@@ -1,0 +1,62 @@
+---
+title: "Analysis Driver"
+format:
+  html:
+    toc: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+library(here)
+library(tidyverse)
+library(janitor)
+library(lme4)
+library(ggthemes)
+library(stringr)
+library(ggtext)
+
+# Source the scripts that hold the real logic
+source("R/reward_plots.R")
+```
+
+## Data
+
+```{r}
+experiment_name <- "transfer_bandits_choice_textbox"
+version         <- "pilot_C"
+
+# Create the figure directory
+fig_dir <- here("figures", experiment_name, version)
+if (!dir.exists(fig_dir)) {
+  dir.create(fig_dir, recursive = TRUE)
+}
+
+preprocessed_df <- read_csv(
+  here(
+    "data",
+    experiment_name,
+    version,
+    paste0("preprocessed_data.csv")
+  )
+)
+head(preprocessed_df)
+```
+
+## Plots
+
+### Reward Plots
+
+```{r}
+p1 <- reward_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p1)
+```
+
+### Entropy Plots 
+
+```{r}
+p2 <- entropy_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p2)
+```
