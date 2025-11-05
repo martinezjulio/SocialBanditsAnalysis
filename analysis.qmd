@@ -24,8 +24,8 @@ source("R/entropy_plots.R")
 source("R/choice_frequencies.R")
 source("R/correlations.R")
 source("R/individual_behavior.R")
-source("R/behavior_distribution.R")
-source("R/behavior_distribution_average.R")
+source("R/aggregate_behavior_distribution.R")
+source("R/average_behavior_distribution.R")
 source("R/individual_behavior_distribution.R")
 ```
 
@@ -99,7 +99,8 @@ Note: This generates a large grid showing total arm-pulling counts across all ga
 
 ```{r}
 # Generate behavior distribution grid (saved as PNG file)
-behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+p_dist_aggregate <- aggregate_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+print(p_dist_aggregate)
 ```
 
 ### Average Behavior Distribution Grid
@@ -108,14 +109,8 @@ Note: This shows the average percentage of pulls to each rank across participant
 
 ```{r}
 # Generate average behavior distribution grid (saved as PNG file)
-p_dist_avg <- behavior_distribution_average(preprocessed_df, experiment_name, version, save = TRUE)
-print(p_dist_avg)Round Y
-```
-
-```{r}
-# Generate average behavior distribution grid (saved as PNG file)
 p_dist_avg <- average_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
-print(p_dist_avg)Round Y
+print(p_dist_avg)
 ```
 
 ### Individual Participant Distributions
@@ -125,9 +120,4 @@ Note: This generates one distribution plot per participant showing their arm cho
 ```{r}
 # Generate individual participant distribution plots (saved as separate PNG files)
 individual_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
-```
-
-
-```{r}
-sort(c(0.55,0,0.8,0.5,0.4,0.3,0.6,0.75,0.1,0.35,0.45,0.2))
 ```

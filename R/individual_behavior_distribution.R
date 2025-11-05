@@ -8,7 +8,10 @@ library(ggtext)
 #' Create Individual Participant Behavior Distribution Plots
 #'
 #' Creates arm-pulling distribution plots for each participant showing how their
-#' choices evolve across games and rounds.
+#' choices evolve across games and rounds. Both sessions (expert first and novice first)
+#' are shown in the same plot as different rows.
+#' - Axis tick labels are "payoff, rank" in plain text format.
+#' - Rotation is handled by guide_axis(angle = 90).
 #'
 #' @param preprocessed_df Preprocessed data frame with columns: anonymous_id, 
 #'   session_id, game_sequence, game_index, game, position, action
@@ -103,21 +106,6 @@ individual_behavior_distribution <- function(preprocessed_df, experiment_name, v
     unnest(c(rank, rank_frequencies)) %>%
     rename(count = rank_frequencies) %>%
     mutate(
-      rank_label = case_when(
-        rank == 1 ~ "0.0, **1**",
-        rank == 2 ~ "0.10, **2**",
-        rank == 3 ~ "0.20, **3**",
-        rank == 4 ~ "0.30, **4**",
-        rank == 5 ~ "0.35, **5**",
-        rank == 6 ~ "0.40, **6**",
-        rank == 7 ~ "0.45, **7**",
-        rank == 8 ~ "0.50, **8**",
-        rank == 9 ~ "0.55, **9**",
-        rank == 10 ~ "0.60, **10**",
-        rank == 11 ~ "0.75, **11**",
-        rank == 12 ~ "<span style='color:#00CC00; font-weight:bold;'>0.80, 12</span>",
-        TRUE ~ as.character(rank)
-      ),
       game_sequence_label = factor(game_sequence_label, 
                                    levels = c("Expert First Condition", "Novice First Condition"))
     )
@@ -125,90 +113,83 @@ individual_behavior_distribution <- function(preprocessed_df, experiment_name, v
   # Create factor for proper ordering (1=worst to 12=best)
   plot_data <- plot_data %>%
     mutate(
-      rank_factor = factor(rank, levels = 1:n_arms)
+      rank_factor = factor(rank, levels = 1:n_arms),
+      game_index_factor = factor(game_index, levels = 0:11)
     )
   
-  # Create named vector for rank labels (ensures correct order)
-  rank_labels_vec <- c(
-    "1" = "0.0, **1**",
-    "2" = "0.10, **2**",
-    "3" = "0.20, **3**",
-    "4" = "0.30, **4**",
-    "5" = "0.35, **5**",
-    "6" = "0.40, **6**",
-    "7" = "0.45, **7**",
-    "8" = "0.50, **8**",
-    "9" = "0.55, **9**",
-    "10" = "0.60, **10**",
-    "11" = "0.75, **11**",
-    "12" = '<span style="color:#00CC00; font-weight:bold;">0.80, **12**</span>'
-  )
+  # Create named vector for rank labels (plain text format)
+  payoffs <- c("0.00","0.10","0.20","0.30","0.35","0.40","0.45","0.50","0.55","0.60","0.75","0.80")
+  ranks_chr <- sprintf("%02d", 1:n_arms)  # Two-digit format: 01, 02, ..., 12
+  rank_labels_vec <- paste0(payoffs, ",   ", ranks_chr)
+  rank_labels_vec <- stats::setNames(rank_labels_vec, as.character(1:n_arms))
   
-  # Get unique participant-session combinations
+  # Get unique participants (not sessions)
   participants <- plot_data %>%
-    distinct(anonymous_id, session_id, game_sequence_label) %>%
-    arrange(anonymous_id, session_id)
+    distinct(anonymous_id) %>%
+    arrange(anonymous_id)
   
   saved_files <- character(nrow(participants))
   
-  # Helper function to clean session_id for filename
-  session_label_from_id <- function(sid) {
-    s <- as.character(sid)[1]
-    s <- sub("^sid[_-]?", "", s)
-    s <- sub(".*_sid[_-]?", "", s)
-    s
-  }
-  
-  # Create one plot per participant-session
+  # Create one plot per participant showing both sessions as rows
   for (i in seq_len(nrow(participants))) {
     pid <- participants$anonymous_id[i]
-    sid <- participants$session_id[i]
-    condition <- participants$game_sequence_label[i]
     
     participant_data <- plot_data %>%
-      filter(anonymous_id == pid, session_id == sid)
+      filter(anonymous_id == pid)
     
     p <- participant_data %>%
       ggplot(aes(x = rank_factor, y = count)) +
       geom_col(aes(fill = game_type_label), width = 0.8, alpha = 0.8) +
       scale_fill_manual(
         values = c(
-          "Expert" = "#1f77b4",   # Blue for expert demonstrations
-          "Novice" = "#d62728",   # Red for novice demonstrations
-          "Play" = "#2ca02c"      # Green for participant play
+          "Expert" = "#1f77b4",       # Blue for expert demonstrations
+          "Novice" = "#d62728",       # Red for novice demonstrations
+          "Participants" = "#2ca02c"  # Green for participant play
         ),
         name = "Game Type"
       ) +
-      facet_wrap(~ game_index, nrow = 2, ncol = 6,
-                labeller = labeller(game_index = function(x) paste("Game", x))) +
-      scale_x_discrete(labels = rank_labels_vec) +
+      facet_grid(
+        game_sequence_label ~ game_index_factor,
+        scales = "free_y",
+        labeller = labeller(
+          game_index_factor = function(x) paste("Game", x),
+          game_sequence_label = label_value
+        )
+      ) +
+      scale_x_discrete(labels = rank_labels_vec,
+                       breaks = levels(participant_data$rank_factor),
+                       drop = FALSE,
+                       guide = ggplot2::guide_axis(angle = 90, check.overlap = FALSE)) +
       labs(
-        title = paste0("Participant ", pid, " • Session ", session_label_from_id(sid), " - Arm Pull Distribution by Rank"),
-        subtitle = paste0("Condition: ", condition, " | X-axis shows payoff/rank"),
+        title = paste0("Participant ", pid, " - Arm Pull Distribution by Rank"),
+        subtitle = "Top row: Expert First Condition, Bottom row: Novice First Condition",
         x = "Payoff / Rank (1=lowest, 12=highest)",
         y = "Pull Count"
       ) +
-      theme_minimal(base_size = 10) +
+      theme_minimal(base_size = 9) +
       theme(
-        strip.text = element_text(size = 8, face = "bold"),
+        strip.text.x = element_text(size = 6, face = "bold"),
+        strip.text.y = element_text(size = 9, face = "bold"),
         plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
-        plot.subtitle = element_text(hjust = 0.5, size = 9, color = "gray40"),
+        plot.subtitle = element_text(hjust = 0.5, size = 8, color = "gray40"),
         legend.position = "bottom",
-        axis.text.x = element_markdown(size = 7, angle = 90, hjust = 1, vjust = 0.5),
-        axis.text.y = element_text(size = 8),
+        panel.spacing = unit(0.3, "lines"),
+        axis.text.x = element_text(size = 7, hjust = 1, vjust = 0.5),
+        axis.text.y = element_text(size = 6),
+        axis.title = element_text(size = 8),
+        axis.title.x = element_text(size = 8, margin = margin(t = 10, r = 0, b = 0, l = 0)),
         panel.background = element_rect(fill = "white", colour = "grey90"),
         plot.background = element_rect(fill = "white", colour = NA),
         panel.grid.major = element_line(color = "grey95", linewidth = 0.3),
         panel.grid.minor = element_blank()
       )
     
-    sess_lab <- session_label_from_id(sid)
     filename <- file.path(
       dist_dir,
-      paste0("participant_", pid, "_session_", gsub("[^A-Za-z0-9_-]", "_", sess_lab), "_distribution.png")
+      paste0("participant_", pid, "_distribution.png")
     )
     
-    ggsave(filename, plot = p, width = 16, height = 8, dpi = 200, bg = "white")
+    ggsave(filename, plot = p, width = 20, height = 7, dpi = 300, bg = "white")
     saved_files[i] <- filename
     message("Saved: ", filename)
   }

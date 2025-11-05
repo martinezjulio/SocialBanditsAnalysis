@@ -7,8 +7,10 @@ library(ggtext)
 
 #' Create Behavior Distribution Plots
 #'
-#' Creates a grid of histograms showing average arm-pulling distributions across
+#' Creates a grid of histograms showing aggregate arm-pulling distributions across
 #' all games and rounds, organized by condition.
+#' - Axis tick labels are "payoff, rank" in plain text format.
+#' - Rotation is handled by guide_axis(angle = 90).
 #'
 #' @param preprocessed_df Preprocessed data frame with columns: anonymous_id, 
 #'   session_id, game_sequence, game_index, game, position, action
@@ -16,7 +18,7 @@ library(ggtext)
 #' @param version Version identifier
 #' @param save Logical, whether to save the plot to disk
 #' @return A ggplot object showing the distribution grid
-behavior_distribution <- function(preprocessed_df, experiment_name, version, save = FALSE) {
+aggregate_behavior_distribution <- function(preprocessed_df, experiment_name, version, save = FALSE) {
   
   # Create the figure directory if saving
   if (save) {
@@ -116,21 +118,6 @@ behavior_distribution <- function(preprocessed_df, experiment_name, version, sav
     unnest(c(rank, total_counts)) %>%
     rename(count = total_counts) %>%
     mutate(
-      rank_label = case_when(
-        rank == 1 ~ "0.0, **1**",
-        rank == 2 ~ "0.10, **2**",
-        rank == 3 ~ "0.20, **3**",
-        rank == 4 ~ "0.30, **4**",
-        rank == 5 ~ "0.35, **5**",
-        rank == 6 ~ "0.40, **6**",
-        rank == 7 ~ "0.45, **7**",
-        rank == 8 ~ "0.50, **8**",
-        rank == 9 ~ "0.55, **9**",
-        rank == 10 ~ "0.60, **10**",
-        rank == 11 ~ "0.75, **11**",
-        rank == 12 ~ "<span style='color:#00CC00; font-weight:bold;'>0.80, 12</span>",
-        TRUE ~ as.character(rank)
-      ),
       game_sequence_label = factor(game_sequence_label, 
                                    levels = c("Expert First Condition", "Novice First Condition"))
     )
@@ -142,21 +129,11 @@ behavior_distribution <- function(preprocessed_df, experiment_name, version, sav
       game_index_factor = factor(game_index, levels = 0:11)
     )
   
-  # Create named vector for rank labels (ensures correct order)
-  rank_labels_vec <- c(
-    "1" = "0.0, **1**",
-    "2" = "0.10, **2**",
-    "3" = "0.20, **3**",
-    "4" = "0.30, **4**",
-    "5" = "0.35, **5**",
-    "6" = "0.40, **6**",
-    "7" = "0.45, **7**",
-    "8" = "0.50, **8**",
-    "9" = "0.55, **9**",
-    "10" = "0.60, **10**",
-    "11" = "0.75, **11**",
-    "12" = '<span style="color:#00CC00; font-weight:bold;">0.80, **12**</span>'
-  )
+  # Create named vector for rank labels (plain text format)
+  payoffs <- c("0.00","0.10","0.20","0.30","0.35","0.40","0.45","0.50","0.55","0.60","0.75","0.80")
+  ranks_chr <- sprintf("%02d", 1:n_arms)  # Two-digit format: 01, 02, ..., 12
+  rank_labels_vec <- paste0(payoffs, ",   ", ranks_chr)
+  rank_labels_vec <- stats::setNames(rank_labels_vec, as.character(1:n_arms))
   
   # Create game type mapping for column labels (show what each game is for each condition)
   game_type_map <- plot_data %>%
@@ -197,10 +174,13 @@ behavior_distribution <- function(preprocessed_df, experiment_name, version, sav
         game_sequence_label = label_value
       )
     ) +
-    scale_x_discrete(labels = rank_labels_vec) +
+    scale_x_discrete(labels = rank_labels_vec,
+                     breaks = levels(plot_data$rank_factor),
+                     drop = FALSE,
+                     guide = ggplot2::guide_axis(angle = 90, check.overlap = FALSE)) +
     labs(
       title = "Total Arm-Pull Counts by Rank Across Games and Rounds",
-      subtitle = "Aggregate counts across all participants. X-axis shows payoff/rank",
+      subtitle = "Expert First Condition: Expert-Play-Novice-Play-Choice; Novice First Condition: Novice-Play-Expert-Play-Choice.",
       x = "Payoff / Rank (1=lowest, 12=highest)",
       y = "Total Pull Count"
     ) +
@@ -212,9 +192,10 @@ behavior_distribution <- function(preprocessed_df, experiment_name, version, sav
       plot.subtitle = element_text(hjust = 0.5, size = 8, color = "gray40"),
       legend.position = "bottom",
       panel.spacing = unit(0.3, "lines"),
-      axis.text.x = element_markdown(size = 6, angle = 90, hjust = 1, vjust = 0.5),
+      axis.text.x = element_text(size = 7, hjust = 1, vjust = 0.5),
       axis.text.y = element_text(size = 6),
       axis.title = element_text(size = 8),
+      axis.title.x = element_text(size = 8, margin = margin(t = 10, r = 0, b = 0, l = 0)),
       panel.background = element_rect(fill = "white", colour = "grey90"),
       plot.background = element_rect(fill = "white", colour = NA),
       panel.grid.major = element_line(color = "grey95", linewidth = 0.3),
@@ -224,11 +205,11 @@ behavior_distribution <- function(preprocessed_df, experiment_name, version, sav
   # Save plot if requested
   if (save) {
     ggsave(
-      filename = here(fig_dir, paste0(experiment_name, "_", version, "_behavior_distribution.png")),
+      filename = here(fig_dir, paste0(experiment_name, "_", version, "_aggregate_behavior_distribution.png")),
       plot = p_dist, width = 20, height = 7, dpi = 300, bg = "white"
     )
     message("Saved behavior distribution plot to: ", 
-            here(fig_dir, paste0(experiment_name, "_", version, "_behavior_distribution.png")))
+            here(fig_dir, paste0(experiment_name, "_", version, "_aggregate_behavior_distribution.png")))
   }
   
   # Return the plot object
