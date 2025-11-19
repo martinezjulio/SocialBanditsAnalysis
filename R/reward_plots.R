@@ -120,7 +120,7 @@ reward_plots <- function(preprocessed_df, experiment_name, version, save = FALSE
   # Save plot if requested
   if (save) {
     ggsave(
-      filename = here(fig_dir, paste0(experiment_name, "_", version, "_reward_overlay.png")),
+      filename = here(fig_dir, paste0(experiment_name, "_", version, "_reward.png")),
       plot = p1, width = 10, height = 8, bg = "white"
     )
   }

@@ -50,13 +50,26 @@ preprocessed_df <- read_csv(
   )
 )
 head(preprocessed_df)
+
+version         <- "hybrid_model"
+model_df <- read_csv(
+  here(
+    "data",
+    experiment_name,
+    version,
+    paste0("hybrid_model_predictions.csv")
+  )
+)
+head(model_df)
 ```
+
 
 ## Plots
 
 ### Choice Frequencies
 
 ```{r}
+version         <- "pilot_C"
 p1 <- choice_frequencies(preprocessed_df, experiment_name, version, save = TRUE)
 print(p1)
 ```
@@ -64,15 +77,25 @@ print(p1)
 ### Reward Plots
 
 ```{r}
-p2 <- reward_plots(preprocessed_df, experiment_name, version, save = TRUE)
-print(p2)
+version         <- "pilot_C"
+p2_human <- reward_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p2_human)
+
+version         <- "hybrid_model"
+p2_model <- reward_plots(model_df, experiment_name, version, save = TRUE)
+print(p2_model)
 ```
 
 ### Entropy Plots 
 
 ```{r}
-p3 <- entropy_plots(preprocessed_df, experiment_name, version, save = TRUE)
-print(p3)
+version         <- "pilot_C"
+p3_human <- entropy_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p3_human)
+
+version         <- "hybrid_model"
+p3_model <- entropy_plots(model_df, experiment_name, version, save = TRUE)
+print(p3_model)
 ```
 
 
