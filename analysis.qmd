@@ -27,6 +27,7 @@ source("R/individual_behavior.R")
 source("R/aggregate_behavior_distribution.R")
 source("R/average_behavior_distribution.R")
 source("R/individual_behavior_distribution.R")
+source("R/experience_plots.R")
 ```
 
 ## Data
@@ -52,15 +53,8 @@ preprocessed_df <- read_csv(
 head(preprocessed_df)
 
 version         <- "hybrid_model"
-model_df <- read_csv(
-  here(
-    "data",
-    experiment_name,
-    version,
-    paste0("hybrid_model_predictions.csv")
-  )
-)
-head(model_df)
+model_df <- read_csv("/Users/juliomartinez/Documents/PhD/SocialBanditGuider/data/model_predictions/hybrid_model_predictions.csv")
+model_df <- filter(model_df, learner_segment_input == "model" & beta_method == "theta_betas")
 ```
 
 
@@ -103,18 +97,15 @@ print(p3_model)
 ### Arm-Pulling Correlations
 
 ```{r}
-p4 <- correlations(preprocessed_df, experiment_name, version, save = TRUE)
-print(p4)
+version         <- "pilot_C"
+p4_human <- correlations(preprocessed_df, experiment_name, version, save = TRUE)
+print(p4_human)
+
+version         <- "hybrid_model"
+p4_model <- correlations(model_df, experiment_name, version, save = TRUE)
+print(p4_model)
 ```
 
-### Individual Participant Trajectories
-
-Note: This generates one plot per participant showing their complete trajectory through the bandit task. Files are saved to `figures/{experiment}/{version}/individual_participants/`.
-
-```{r}
-# Generate individual participant plots (saved as separate PNG files)
-individual_behavior(preprocessed_df, experiment_name, version, save = TRUE)
-```
 
 ### Behavior Distribution Grid (Aggregate Counts)
 
@@ -122,6 +113,7 @@ Note: This generates a large grid showing total arm-pulling counts across all ga
 
 ```{r}
 # Generate behavior distribution grid (saved as PNG file)
+version         <- "pilot_C"
 p_dist_aggregate <- aggregate_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
 print(p_dist_aggregate)
 ```
@@ -132,8 +124,33 @@ Note: This shows the average percentage of pulls to each rank across participant
 
 ```{r}
 # Generate average behavior distribution grid (saved as PNG file)
-p_dist_avg <- average_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
-print(p_dist_avg)
+version         <- "pilot_C"
+p_dist_avg_human <- average_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+print(p_dist_avg_human)
+
+version         <- "hybrid_model"
+p_dist_avg_model <- average_behavior_distribution(model_df, experiment_name, version, save = TRUE)
+print(p_dist_avg_model)
+```
+
+### Model Experience Predictions
+
+Note: This plot shows the model's predicted experience (N_total) for expert and novice demonstrators across the game sequence. N_total is defined as the sum of all alpha and beta parameters across the 12 arms of the bandit, representing the total prior experience the model has accumulated. The plot shows the average N_total across sessions (lines and points with error bars) along with individual session values (jittered points).
+
+```{r}
+version         <- "hybrid_model"
+p_experience <- experience_plots(model_df, experiment_name, version, save = TRUE)
+print(p_experience)
+```
+
+### Individual Participant Trajectories
+
+Note: This generates one plot per participant showing their complete trajectory through the bandit task. Files are saved to `figures/{experiment}/{version}/individual_participants/`.
+
+```{r}
+# Generate individual participant plots (saved as separate PNG files)
+version         <- "pilot_C"
+individual_behavior(preprocessed_df, experiment_name, version, save = TRUE)
 ```
 
 ### Individual Participant Distributions
@@ -142,5 +159,6 @@ Note: This generates one distribution plot per participant showing their arm cho
 
 ```{r}
 # Generate individual participant distribution plots (saved as separate PNG files)
+version         <- "pilot_C"
 individual_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
 ```
