@@ -52,7 +52,7 @@ preprocessed_df <- read_csv(
     paste0("preprocessed_data.csv")
   )
 )
-head(preprocessed_df)
+# head(preprocessed_df)
 ```
 
 ### Participant Analyses
@@ -106,6 +106,7 @@ version         <- "hybrid_model"
 
 model_df <- read_csv("/Users/juliomartinez/Documents/PhD/SocialBanditGuider/data/model_predictions/hybrid_model_predictions.csv")
 model_df <- filter(model_df, learner_segment_input == "model" & beta_method == "theta_betas")
+# head(model_df)
 ```
 
 ### Model Analyses
