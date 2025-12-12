@@ -116,8 +116,12 @@ experience_plots <- function(model_df, experiment_name, version, save = FALSE) {
     facet_wrap(~ game_sequence, ncol = 2) +
     theme_minimal() +
     theme(
-      strip.text = element_text(face = "bold"),
-      plot.title = element_text(face = "bold", hjust = 0.5),
+      strip.text = element_text(face = "bold", size = 16),
+      plot.title = element_text(face = "bold", hjust = 0.5, size = 20),
+      axis.title = element_text(size = 15),
+      axis.text = element_text(size = 13),
+      legend.title = element_text(size = 14),
+      legend.text = element_text(size = 13),
       legend.position = "bottom",
       panel.background = element_rect(fill = "white", colour = NA),
       plot.background = element_rect(fill = "white", colour = NA)

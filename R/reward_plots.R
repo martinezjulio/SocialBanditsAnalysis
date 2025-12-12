@@ -77,8 +77,10 @@ reward_plots <- function(preprocessed_df, experiment_name, version, save = FALSE
     facet_wrap(~ game_sequence, ncol = 2) +
     theme_minimal() +
     theme(
-      strip.text       = element_text(face = "bold"),
-      plot.title       = element_text(face = "bold", hjust = 0.5),
+      strip.text       = element_text(face = "bold", size = 16),
+      plot.title       = element_text(face = "bold", hjust = 0.5, size = 20),
+      axis.title       = element_text(size = 15),
+      axis.text        = element_text(size = 13),
       legend.position  = "none",
       panel.background = element_rect(fill = "white", colour = NA),
       plot.background  = element_rect(fill = "white", colour = NA)
@@ -112,7 +114,7 @@ reward_plots <- function(preprocessed_df, experiment_name, version, save = FALSE
     geom_jitter(
       data = game_totals_tagged %>% filter(game != "choice"),
       aes(x = game_index, y = game_total_reward, shape = game),
-      width = 0.3, height = .1, alpha = 0.45, size = 1.4,
+      width = 0.3, height = .1, alpha = 0.1, size = 1.4,
       inherit.aes = FALSE
     ) +
     scale_shape_manual(values = c(expert = 15, novice = 17, play = 16))

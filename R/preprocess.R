@@ -3,8 +3,10 @@ library(here)
 library(tidyverse)
 
 # 1) Set Experiment Name and Version
-experiment_name <- "transfer_bandits_choice_textbox"
-version         <- "pilot_C"
+#experiment_name <- "transfer_bandits_choice_textbox"
+#version         <- "pilot_C"
+experiment_name <- "choice"
+version         <- "full_experiment"
 
 # 2) Read Demographics File from Prolific 
 demographics <- read_csv(

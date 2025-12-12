@@ -29,12 +29,14 @@ source("R/average_behavior_distribution.R")
 source("R/individual_behavior_distribution.R")
 source("R/experience_plots.R")
 ```
+## Section 1: Participant Results
 
-## Data
+### Data
 
 ```{r}
 experiment_name <- "transfer_bandits_choice_textbox"
 version         <- "pilot_C"
+run_individual_behavior <- FALSE
 
 # Create the figure directory
 fig_dir <- here("figures", experiment_name, version)
@@ -51,114 +53,80 @@ preprocessed_df <- read_csv(
   )
 )
 head(preprocessed_df)
+```
 
+### Participant Analyses
+
+```{r}
+# Choice Frequencies
+p1 <- choice_frequencies(preprocessed_df, experiment_name, version, save = TRUE)
+print(p1)
+
+# Reward Plots
+p2_human <- reward_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p2_human)
+
+# Entropy Plots
+p3_human <- entropy_plots(preprocessed_df, experiment_name, version, save = TRUE)
+print(p3_human)
+
+# Arm-Pulling Correlations
+p4_human <- correlations(preprocessed_df, experiment_name, version, save = TRUE)
+print(p4_human)
+
+# Average Behavior Distribution Grid
+p_dist_avg_human <- average_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+print(p_dist_avg_human)
+```
+
+### Individual Participant Analyses
+
+```{r}
+# Individual Participant Trajectories
+if (run_individual_behavior) {
+  individual_behavior(preprocessed_df, experiment_name, version, save = TRUE)
+}
+
+```
+
+```{r}
+# Individual Participant Distributions
+if (run_individual_behavior) {
+  individual_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
+}
+```
+
+## Section 2: Model Results
+
+### Data
+
+```{r}
+experiment_name <- "transfer_bandits_choice_textbox"
 version         <- "hybrid_model"
+
 model_df <- read_csv("/Users/juliomartinez/Documents/PhD/SocialBanditGuider/data/model_predictions/hybrid_model_predictions.csv")
 model_df <- filter(model_df, learner_segment_input == "model" & beta_method == "theta_betas")
 ```
 
-
-## Plots
-
-### Choice Frequencies
-
+### Model Analyses
 ```{r}
-version         <- "pilot_C"
-p1 <- choice_frequencies(preprocessed_df, experiment_name, version, save = TRUE)
-print(p1)
-```
-
-### Reward Plots
-
-```{r}
-version         <- "pilot_C"
-p2_human <- reward_plots(preprocessed_df, experiment_name, version, save = TRUE)
-print(p2_human)
-
-version         <- "hybrid_model"
+# Reward Plots
 p2_model <- reward_plots(model_df, experiment_name, version, save = TRUE)
 print(p2_model)
-```
 
-### Entropy Plots 
-
-```{r}
-version         <- "pilot_C"
-p3_human <- entropy_plots(preprocessed_df, experiment_name, version, save = TRUE)
-print(p3_human)
-
-version         <- "hybrid_model"
+# Entropy Plots
 p3_model <- entropy_plots(model_df, experiment_name, version, save = TRUE)
 print(p3_model)
-```
 
-
-
-### Arm-Pulling Correlations
-
-```{r}
-version         <- "pilot_C"
-p4_human <- correlations(preprocessed_df, experiment_name, version, save = TRUE)
-print(p4_human)
-
-version         <- "hybrid_model"
+# Arm-Pulling Correlations
 p4_model <- correlations(model_df, experiment_name, version, save = TRUE)
 print(p4_model)
-```
 
-
-### Behavior Distribution Grid (Aggregate Counts)
-
-Note: This generates a large grid showing total arm-pulling counts across all games. Saved as a separate file.
-
-```{r}
-# Generate behavior distribution grid (saved as PNG file)
-version         <- "pilot_C"
-p_dist_aggregate <- aggregate_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
-print(p_dist_aggregate)
-```
-
-### Average Behavior Distribution Grid
-
-Note: This shows the average percentage of pulls to each rank across participants. Unlike the aggregate version, this normalizes each participant's behavior to proportions first, then averages them. This gives equal weight to each participant and shows the typical behavior pattern.
-
-```{r}
-# Generate average behavior distribution grid (saved as PNG file)
-version         <- "pilot_C"
-p_dist_avg_human <- average_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
-print(p_dist_avg_human)
-
-version         <- "hybrid_model"
+# Average Behavior Distribution Grid
 p_dist_avg_model <- average_behavior_distribution(model_df, experiment_name, version, save = TRUE)
 print(p_dist_avg_model)
-```
 
-### Model Experience Predictions
-
-Note: This plot shows the model's predicted experience (N_total) for expert and novice demonstrators across the game sequence. N_total is defined as the sum of all alpha and beta parameters across the 12 arms of the bandit, representing the total prior experience the model has accumulated. The plot shows the average N_total across sessions (lines and points with error bars) along with individual session values (jittered points).
-
-```{r}
-version         <- "hybrid_model"
+# Model Experience Predictions
 p_experience <- experience_plots(model_df, experiment_name, version, save = TRUE)
 print(p_experience)
-```
-
-### Individual Participant Trajectories
-
-Note: This generates one plot per participant showing their complete trajectory through the bandit task. Files are saved to `figures/{experiment}/{version}/individual_participants/`.
-
-```{r}
-# Generate individual participant plots (saved as separate PNG files)
-version         <- "pilot_C"
-individual_behavior(preprocessed_df, experiment_name, version, save = TRUE)
-```
-
-### Individual Participant Distributions
-
-Note: This generates one distribution plot per participant showing their arm choices across all 12 games. Files are saved to `figures/{experiment}/{version}/individual_distributions/`.
-
-```{r}
-# Generate individual participant distribution plots (saved as separate PNG files)
-version         <- "pilot_C"
-individual_behavior_distribution(preprocessed_df, experiment_name, version, save = TRUE)
 ```

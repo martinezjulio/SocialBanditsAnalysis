@@ -150,11 +150,14 @@ correlations <- function(preprocessed_df, experiment_name, version, save = FALSE
     ) +
     theme_minimal() +
     theme(
-      strip.text = element_text(face = "bold", size = 12),
-      plot.title = element_text(face = "bold", hjust = 0.5, size = 14),
-      plot.subtitle = element_text(hjust = 0.5, size = 10, color = "gray40"),
+      strip.text = element_text(face = "bold", size = 16),
+      plot.title = element_text(face = "bold", hjust = 0.5, size = 20),
+      plot.subtitle = element_text(hjust = 0.5, size = 16, color = "gray40"),
+      axis.title = element_text(size = 15),
+      axis.text = element_text(size = 13),
+      legend.title = element_text(size = 14),
+      legend.text = element_text(size = 13),
       legend.position = "bottom",
-      axis.text.x = element_text(size = 9),
       panel.grid.major.x = element_blank(),
       panel.background = element_rect(fill = "white", colour = NA),
       plot.background = element_rect(fill = "white", colour = NA)

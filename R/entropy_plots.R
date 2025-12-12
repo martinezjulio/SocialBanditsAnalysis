@@ -104,7 +104,7 @@ entropy_plots <- function(preprocessed_df, experiment_name, version, save = FALS
     geom_jitter(
       data = game_entropy %>% filter(game != "choice"),
       aes(x = game_index, y = entropy_bits, shape = game),
-      width = 0.15, height = 0, alpha = 0.35, size = 1.4, inherit.aes = FALSE
+      width = 0.15, height = 0, alpha = 0.1, size = 1.4, inherit.aes = FALSE
     ) +
     scale_shape_manual(values = c(expert = 15, novice = 17, play = 16)) +
     scale_x_continuous(breaks = 0:11) +
@@ -116,8 +116,10 @@ entropy_plots <- function(preprocessed_df, experiment_name, version, save = FALS
     facet_wrap(~ game_sequence, ncol = 2) +
     theme_minimal() +
     theme(
-      strip.text      = element_text(face = "bold"),
-      plot.title      = element_text(face = "bold", hjust = 0.5),
+      strip.text      = element_text(face = "bold", size = 16),
+      plot.title      = element_text(face = "bold", hjust = 0.5, size = 20),
+      axis.title      = element_text(size = 15),
+      axis.text       = element_text(size = 13),
       legend.position = "none"
     )
   
